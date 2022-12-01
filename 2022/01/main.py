@@ -35,7 +35,6 @@ def main():
 	top3Calories = totalCalories[-3:]
 	
 	# result
-	print(totalCalories)
 	print("Part 1:", maxCalories)
 	print("Part 2:", sum(top3Calories))
 
