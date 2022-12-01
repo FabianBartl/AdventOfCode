@@ -28,10 +28,9 @@ function sum(array) {
 	}, 0);
 }
 
-function main() {
+function main(dataElement) {
 	// get calories per elve
-	// let totalCalories = getTotalCalories("exampleData");
-	let totalCalories = getTotalCalories("inputData");
+	let totalCalories = getTotalCalories(dataElement);
 	
 	// list length
 	const tcLen = totalCalories.length
@@ -42,6 +41,6 @@ function main() {
 	
 	// results
 	resultsElement = document.getElementById("resultsParagraph");
-	resultsElement.innerHTML += "Part 1: " + maxCalories + "<br>";
+	resultsElement.innerHTML  = "Part 1: " + maxCalories + "<br>";
 	resultsElement.innerHTML += "Part 2: " + sum(top3Calories);
 }

@@ -1,10 +1,9 @@
 <!doctype html>
 <html>
-	<? $aoc_d1 = "AoC 2022 - Day 01"; ?>
+	<? $aoc_d1 = "AoC 2022 - Day 01" ?>
 	
 	<head>
 		<title><?= $aoc_d1 ?></title>
-		<script src="main.js" defer></script>
 		<style>
 			pre {
 				background-color: #eee;
@@ -15,23 +14,38 @@
 		</style>
 	</head>
 	
-	<body onload="main();">
+	<body>
 		<h1><?= $aoc_d1 ?></h1>
 		
-		<form>
-			<select>
-				<option></option>
+		<?php
+			$dataSource = $_GET["dataSource"];
+			switch ($dataSource)
+			{
+				case "exampleData":
+				case "inputData":
+					break;
+				default:
+					$dataSource = "exampleData";
+			}
+			$dataFile = str_replace("Data", "", $dataSource).".txt";
+		?>
+		
+		<form name="settings">
+			<select name="dataSource">
+				<option value="exampleData" <? if ($dataSource === "exampleData"): ?>selected<? endif; ?>>example data</option>
+				<option value="inputData" <? if ($dataSource === "inputData"): ?>selected<? endif; ?>>input data</option>
 			</select>
+			<button submit>submit</button>
 		</form>
 		
 		<?php
-function getTotalCalories($filename)
+function getTotalCalories()
 {
 	$totalCalories = array();
 	$calories = 0;
 	
 	// open file
-	$fileHandle = fopen($filename, "r");
+	$fileHandle = fopen($GLOBALS["dataFile"], "r");
 
 	// read line by line
 	while ($line = fgets($fileHandle))
@@ -57,8 +71,7 @@ function getTotalCalories($filename)
 function main()
 {
 	// get calories per elve
-	// $totalCalories = getTotalCalories("example.txt");
-	$totalCalories = getTotalCalories("input.txt");
+	$totalCalories = getTotalCalories();
 	
 	// get max calories
 	$maxCalories = array_slice($totalCalories, count($totalCalories)-1);
@@ -72,19 +85,25 @@ function main()
 		?>
 		
 		<h2>PHP</h2>
-		<p><? main(); ?></p>
+		<p><? main($dataSource); ?></p>
 		
 		<h2>JavaScript</h2>
-		<p id="resultsParagraph"></p>
+		<p id="resultsParagraph">placeholder</p>
 		
-		<details open>
-			<summary>Example data</summary>
-			<pre id="exampleData"><?= file_get_contents("example.txt"); ?></pre>
-		</details>
-		<br>
 		<details>
-			<summary>My input data</summary>
-			<pre id="inputData"><?= file_get_contents("input.txt"); ?></pre>
+			<summary>
+				<? if ($dataSource === "exampleData"): ?>
+					Example data
+				<? elseif ($dataSource === "inputData"): ?>
+					My input data
+				<? endif; ?>
+			</summary>
+			<pre id="<?= $dataSource ?>"><?= file_get_contents($dataFile); ?></pre>
 		</details>
+		
+		<script>
+			<? include("main.js") ?>
+			main("<?= $dataSource ?>");
+		</script>
 	</body>
 </html>
