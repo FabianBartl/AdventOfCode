@@ -2,7 +2,7 @@
 import sys
 
 
-def getTotalCalories(data: list, sorted:bool=True) -> list[int]:
+def getTotalCalories(data: list) -> list[int]:
 	totalCalories = []
 	calories = 0
 	
@@ -14,8 +14,7 @@ def getTotalCalories(data: list, sorted:bool=True) -> list[int]:
 			calories += int(line)
 	totalCalories.append(calories)
 	
-	if sorted:
-		totalCalories.sort()
+	totalCalories.sort()
 	
 	return totalCalories
 
@@ -27,7 +26,7 @@ def main():
 		inputData = fobj.readlines()
 	
 	# get calories per elve
-	totalCalories = getTotalCalories(inputData, sorted=True)
+	totalCalories = getTotalCalories(inputData)
 	
 	# get max calories
 	maxCalories = totalCalories[-1]
