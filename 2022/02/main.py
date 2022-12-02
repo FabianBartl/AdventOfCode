@@ -54,8 +54,8 @@ def part1(inputFile:str):
 	
 	# calculate points
 	totalPoints = 0
-	for round in inputData:
-		op, me = round[0], round[1]
+	for _round in inputData:
+		op, me = _round[0], _round[1]
 		result = pointsT2result[(op,me)]
 		totalPoints += me + result2points[result]
 	
@@ -72,8 +72,8 @@ def part2(inputFile:str):
 	
 	# calculate points
 	totalPoints = 0
-	for round in inputData:
-		op, me = round[0], round[1]  # points:int, result:str
+	for _round in inputData:
+		op, me = _round[0], _round[1]  # points:int, result:str
 		points = pointsResult2points[(op,me)]
 		result = pointsT2result[(op,points)]
 		totalPoints += points + result2points[result]
