@@ -1,15 +1,9 @@
 
-import sys
+import sys, string
 
 
 def char2priority(char:str):
-	ordinary = ord(char)
-	if 97 <= ordinary <= 122:
-		return ordinary - 96
-	elif 65 <= ordinary <= 90:
-		return ordinary - 38
-	else:
-		raise ValueError("only chars from a-z and A-Z are allowed")
+	return string.ascii_letters.index(char) + 1
 
 
 
