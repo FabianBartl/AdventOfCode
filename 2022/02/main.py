@@ -49,7 +49,7 @@ def part1(inputFile:str):
 	inputData = []
 	with open(inputFile, "r") as fobj:
 		for line in fobj.readlines():
-			symbols = line.replace("\n", "").split(" ")
+			symbols = line.strip().split(" ")
 			inputData.append([ symbol2points[symbols[0]], symbol2points[symbols[1]] ])
 	
 	# calculate points
@@ -67,7 +67,7 @@ def part2(inputFile:str):
 	inputData = []
 	with open(inputFile, "r") as fobj:
 		for line in fobj.readlines():
-			symbols = line.replace("\n", "").split(" ")
+			symbols = line.strip().split(" ")
 			inputData.append([ symbol2points[symbols[0]], symbol2result[symbols[1]] ])
 	
 	# calculate points

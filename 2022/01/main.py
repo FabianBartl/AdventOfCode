@@ -7,7 +7,8 @@ def getTotalCalories(data: list) -> list[int]:
 	calories = 0
 	
 	for line in data:
-		if line == "\n":
+		line = line.strip()
+		if line == "":
 			totalCalories.append(calories)
 			calories = 0
 		else:
