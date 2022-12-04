@@ -18,8 +18,8 @@ def main():
 	for sections in inputData:
 		section1, section2 = sections
 		
-		if section2[0] <= section1[0] <= section2[1] and section2[0] <= section1[1] <= section2[1] or \
-		   section1[0] <= section2[0] <= section1[1] and section1[0] <= section2[1] <= section1[1]:
+		if section2[0] <= section1[0] <= section2[1] >= section1[1] >= section2[0] or \
+		   section1[0] <= section2[0] <= section1[1] >= section2[1] >= section1[0]:
 			overlapsP1 += 1
 		
 		if section2[0] <= section1[0] <= section2[1] or section2[0] <= section1[1] <= section2[1] or \
