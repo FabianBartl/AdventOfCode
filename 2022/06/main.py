@@ -14,7 +14,6 @@ def main():
 	for index, _ in enumerate(stream[:-seqLen]):
 		seq = stream[index:index+seqLen]
 		seqSet = set(seq)
-		# print(seq, seqSet)
 		if len(seqSet) == seqLen:
 			seqPos_start = index + seqLen
 			break
@@ -25,7 +24,6 @@ def main():
 	for index, _ in enumerate(stream[:-seqLen]):
 		seq = stream[index:index+seqLen]
 		seqSet = set(seq)
-		# print(seq, seqSet)
 		if len(seqSet) == seqLen:
 			seqPos_message = index + seqLen
 			break
