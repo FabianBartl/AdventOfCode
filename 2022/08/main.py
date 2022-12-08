@@ -1,5 +1,5 @@
 
-import sys, re
+import sys
 
 
 class Tree:
@@ -29,21 +29,18 @@ class Forest:
 		self.rowsNum = len(self.treeGrid)
 		self.columnsNum = len(self.treeGrid[0])
 	
-	def countVisibleTrees(self):
-		visibleTrees = 0
+	def flatten(self):
+		flattedList = []
 		for row in self:
 			for tree in row:
-				if tree:
-					visibleTrees += 1
-		return visibleTrees
+				flattedList.append(tree)
+		return flattedList
 	
-	def getMaxScore(self):
-		maxScore = 0
-		for row in self:
-			for tree in row:
-				if tree.score > maxScore:
-					maxScore = tree.score
-		return maxScore
+	def countVisibleTrees(self):
+		return sum(int(tree.visible) for tree in self.flatten())
+	
+	def getScores(self):
+		return sorted(self.flatten(), reverse=True, key=lambda x: x.score)
 	
 	def render(self, *, rowStr=lambda row: "[" + "".join([ tree.render() for tree in row ]) + "]"):
 		gridStr = ""
@@ -56,76 +53,79 @@ class Forest:
 	def __repr__(self):
 		return self.render(rowStr=lambda row: f"{row}")
 	
+	def __len__(self):
+		return self.rowsNum * self.columnsNum
+	
+	def __getitem__(self, row):
+		return self.treeGrid[row]
+	
 	def __iter__(self):
 		return iter(self.treeGrid)
 
 
 def setVisibility(forest):
-	# look from left
 	for rowNum, row in enumerate(forest):
-		maxHeight = len(forest.treeGrid[rowNum][0])
+		# look from left
+		maxHeightLeft = len(forest[rowNum][0])
 		for colNum, tree in enumerate(row):
-			if (currentHeight := len(tree)) > maxHeight:
+			if (currentHeight := len(tree)) > maxHeightLeft:
 				tree.visible = True
-				maxHeight = currentHeight
-	
-	# look from right
-	for rowNum, row in enumerate(forest):
-		maxHeight = len(forest.treeGrid[rowNum][-1])
+				maxHeightLeft = currentHeight
+		# look from right
+		maxHeightRight = len(forest[rowNum][-1])
 		for colNum, tree in enumerate(row[::-1]):
-			if (currentHeight := len(tree)) > maxHeight:
+			if (currentHeight := len(tree)) > maxHeightRight:
 				tree.visible = True
-				maxHeight = currentHeight
+				maxHeightRight = currentHeight
 	
-	# look from top
 	for colNum in range(forest.columnsNum):
-		maxHeight = len(forest.treeGrid[0][colNum])
+		# look from top
+		maxHeightTop = len(forest[0][colNum])
 		for rowNum in range(forest.rowsNum):
-			tree = forest.treeGrid[rowNum][colNum]
-			if (currentHeight := len(tree)) > maxHeight:
+			tree = forest[rowNum][colNum]
+			if (currentHeight := len(tree)) > maxHeightTop:
 				tree.visible = True
-				maxHeight = currentHeight
+				maxHeightTop = currentHeight
 	
-	# look from top
-	for colNum in range(forest.columnsNum):
-		maxHeight = len(forest.treeGrid[-1][colNum])
+		# look from bottom
+		maxHeightBottom = len(forest[-1][colNum])
 		for rowNum in range(1, forest.rowsNum+1):
-			tree = forest.treeGrid[-rowNum][colNum]
-			if (currentHeight := len(tree)) > maxHeight:
+			tree = forest[-rowNum][colNum]
+			if (currentHeight := len(tree)) > maxHeightBottom:
 				tree.visible = True
-				maxHeight = currentHeight
+				maxHeightBottom = currentHeight
 
 def setScore(forest):
 	for r in range(forest.rowsNum):
 		for c in range(forest.columnsNum):
-			tree = forest.treeGrid[r][c]
+			tree = forest[r][c]
 			
 			# look to right
 			counterRight = 0
 			for colNum in range(c+1, forest.columnsNum):
 				counterRight += 1
-				if len(forest.treeGrid[r][colNum]) >= len(tree):
+				if len(forest[r][colNum]) >= len(tree):
 					break
 			
 			# look to left
 			counterLeft = 0
 			for colNum in range(-(forest.columnsNum-c+1), -(forest.columnsNum+1), -1):
 				counterLeft += 1
-				if len(forest.treeGrid[r][colNum]) >= len(tree):
+				if len(forest[r][colNum]) >= len(tree):
 					break
 			
 			# look to bottom
 			counterBottom = 0
 			for rowNum in range(r+1, forest.rowsNum):
 				counterBottom += 1
-				if len(forest.treeGrid[rowNum][c]) >= len(tree):
+				if len(forest[rowNum][c]) >= len(tree):
 					break
 			
 			# look to top
 			counterTop = 0
 			for rowNum in range(-(forest.rowsNum-r+1), -(forest.rowsNum+1), -1):
 				counterTop += 1
-				if len(forest.treeGrid[rowNum][c]) >= len(tree):
+				if len(forest[rowNum][c]) >= len(tree):
 					break
 			
 			tree.score = counterRight * counterLeft * counterBottom * counterTop
@@ -153,7 +153,7 @@ def main():
 	
 	# Part 2: get tree score with the best viewing distance in all directions
 	setScore(forest)
-	maxScore = forest.getMaxScore()
+	maxScore = forest.getScores()[0].score
 	
 	# result
 	print(forest.render(), "\n")
