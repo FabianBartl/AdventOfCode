@@ -3,13 +3,16 @@ import sys, re
 
 
 class Tree:
-	def __init__(self, height, visible=False):
+	def __init__(self, height, visible=False, score=0):
 		self.height = height
 		self.visible = visible
-		self.score = 0
+		self.score = score
+	
+	def render(self):
+		return "#" if self.visible else "_"
 	
 	def __repr__(self):
-		return f"Tree({len(self)}, {'#' if self else '_'}, {self.score})"
+		return f"Tree(height={self.height}, visible={self.visible}, score={self.score})"
 	
 	def __len__(self):
 		return int(self.height)
@@ -34,23 +37,24 @@ class Forest:
 					visibleTrees += 1
 		return visibleTrees
 	
-	def __repr__(self, *, onlyVisibility=False):
+	def getMaxScore(self):
+		maxScore = 0
+		for row in self:
+			for tree in row:
+				if tree.score > maxScore:
+					maxScore = tree.score
+		return maxScore
+	
+	def render(self, *, rowStr=lambda row: "[" + "".join([ tree.render() for tree in row ]) + "]"):
 		gridStr = ""
 		for num, row in enumerate(self.treeGrid):
-			if num == 0:
-				gridStr += " ["
-			else:
-				gridStr += "  "
-			if onlyVisibility:
-				treeStr = "".join([ f"{'#' if tree else '_'}" for tree in row ])
-			else:
-				treeStr = "".join([ f" {len(tree)} {'#' if tree else '_'} {tree.score} " for tree in row ])
-			gridStr += "[" + treeStr + "]"
-			if num != self.rowsNum-1:
-				gridStr += ",\n"
-			else:
-				gridStr += "]"
+			gridStr += " [" if not num else "  "
+			gridStr += rowStr(row)
+			gridStr += ",\n" if num != self.rowsNum-1 else "]"
 		return f"Forest(\n{gridStr}\n)"
+	
+	def __repr__(self):
+		return self.render(rowStr=lambda row: f"{row}")
 	
 	def __iter__(self):
 		return iter(self.treeGrid)
@@ -91,29 +95,7 @@ def setVisibility(forest):
 				tree.visible = True
 				maxHeight = currentHeight
 
-
-def main():
-	# read data file
-	inputFile = sys.argv[1] if len(sys.argv) >= 2 else "example.txt"
-	with open(inputFile, "r") as fobj:
-		lines = fobj.readlines()
-		
-		treeGrid = []
-		for num, line in enumerate(lines):
-			line = line.strip()
-			treeRow = []
-			for pos, char in enumerate(line):
-				visibility = (pos == 0 or pos == len(line)-1) or (num == 0 or num == len(lines)-1)
-				treeRow.append(Tree(int(char), visibility))
-			treeGrid.append(treeRow)
-		forest = Forest(treeGrid)
-	
-	# Part 1: get total number of visible trees
-	setVisibility(forest)
-	totalVisibleTrees = forest.countVisibleTrees()
-	
-	# Part 2: get tree score with the best viewing distance in all directions
-	scoreList = []
+def setScore(forest):
 	for r in range(forest.rowsNum):
 		for c in range(forest.columnsNum):
 			tree = forest.treeGrid[r][c]
@@ -146,12 +128,37 @@ def main():
 				if len(forest.treeGrid[rowNum][c]) >= len(tree):
 					break
 			
-			scoreList.append(counterRight * counterLeft * counterBottom * counterTop)
+			tree.score = counterRight * counterLeft * counterBottom * counterTop
+
+
+def main():
+	# read data file
+	inputFile = sys.argv[1] if len(sys.argv) >= 2 else "example.txt"
+	with open(inputFile, "r") as fobj:
+		lines = fobj.readlines()
+		
+		treeGrid = []
+		for num, line in enumerate(lines):
+			line = line.strip()
+			treeRow = []
+			for pos, char in enumerate(line):
+				visibility = (pos == 0 or pos == len(line)-1) or (num == 0 or num == len(lines)-1)
+				treeRow.append(Tree(int(char), visibility, 0))
+			treeGrid.append(treeRow)
+		forest = Forest(treeGrid)
+	
+	# Part 1: get total number of visible trees
+	setVisibility(forest)
+	totalVisibleTrees = forest.countVisibleTrees()
+	
+	# Part 2: get tree score with the best viewing distance in all directions
+	setScore(forest)
+	maxScore = forest.getMaxScore()
 	
 	# result
-	print(forest.__repr__(onlyVisibility=True))
+	print(forest.render(), "\n")
 	print("Part 1:", totalVisibleTrees)
-	print("Part 2:", max(scoreList))
+	print("Part 2:", maxScore)
 
 
 if __name__ == "__main__":
