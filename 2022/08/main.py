@@ -35,9 +35,9 @@ class Forest:
 				gridStr += " ["
 			else:
 				gridStr += "  "
-			gridStr += "".join([ "#" if tree else "_" for tree in row ])
+			gridStr += "[" + "".join([ "#" if tree else "_" for tree in row ]) + "]"
 			if num != self.rowsNum-1:
-				gridStr += "\n"
+				gridStr += ",\n"
 			else:
 				gridStr += "]"
 		return f"Forest(\n{gridStr}\n)"
