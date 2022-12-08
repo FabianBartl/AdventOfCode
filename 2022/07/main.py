@@ -100,18 +100,29 @@ def main():
 	for dir, _ in allDirs:
 		dir.size = getEntrySize(dir)
 	
-	# Part 1: get sum of sizes of all directories smaller than 100_000
+	# Part 1: get the sum of sizes of all directories smaller than 100_000
 	maxSize = 100_000
 	totalSize = 0
 	for dir, _ in allDirs:
 		if dir.size <= maxSize:
 			totalSize += dir.size
 	
-	# Part 2: 
+	# Part 2: get the smallest size of the directories, that are big enough to make space for the update
+	diskSize = 70_000_000
+	updateSize = 30_000_000
+	neededSize = updateSize - (diskSize - rootDir.size)
+	
+	freedSize = 0
+	possibleDirs = []
+	for dir, _ in allDirs:
+		if dir.size >= neededSize:
+			possibleDirs.append(dir)
+	freedSize = min(possibleDirs, key=lambda x: x.size).size
 	
 	# result
 	rootDir.printTree()
 	print("Part 1:", totalSize)
+	print("Part 2:", freedSize)
 
 
 if __name__ == "__main__":
