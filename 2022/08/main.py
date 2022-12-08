@@ -100,28 +100,28 @@ def setScore(forest):
 		for c in range(forest.columnsNum):
 			tree = forest.treeGrid[r][c]
 			
-			# from left to right
+			# look to right
 			counterRight = 0
 			for colNum in range(c+1, forest.columnsNum):
 				counterRight += 1
 				if len(forest.treeGrid[r][colNum]) >= len(tree):
 					break
 			
-			# from right to left
+			# look to left
 			counterLeft = 0
 			for colNum in range(-(forest.columnsNum-c+1), -(forest.columnsNum+1), -1):
 				counterLeft += 1
 				if len(forest.treeGrid[r][colNum]) >= len(tree):
 					break
 			
-			# from top to bottom
+			# look to bottom
 			counterBottom = 0
 			for rowNum in range(r+1, forest.rowsNum):
 				counterBottom += 1
 				if len(forest.treeGrid[rowNum][c]) >= len(tree):
 					break
 			
-			# from bottom to top
+			# look to top
 			counterTop = 0
 			for rowNum in range(-(forest.rowsNum-r+1), -(forest.rowsNum+1), -1):
 				counterTop += 1
