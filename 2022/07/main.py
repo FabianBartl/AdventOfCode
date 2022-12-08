@@ -38,16 +38,6 @@ class File:
 		return f"File('{self.name}')"
 
 
-def getDeepestDirs(dir, deepestDirs, currDepth=0):
-	noDirs = True
-	for entry in dir.entries:
-		if type(entry) is Directory:
-			if deeperDir := getDeepestDirs(entry, deepestDirs, currDepth+1):
-				deepestDirs.append(deeperDir)
-			noDirs = False
-	if noDirs:
-		return dir, currDepth
-
 def getAllDirs(dir, allDirs, currDepth=0):
 	for entry in dir.entries:
 		if type(entry) is Directory:
