@@ -119,7 +119,7 @@ def main():
 			possibleDirs.append(dir)
 	freedSize = min(possibleDirs, key=lambda x: x.size).size
 	
-	# result
+	# results
 	rootDir.printTree()
 	print("Part 1:", totalSize)
 	print("Part 2:", freedSize)
