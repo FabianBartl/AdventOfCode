@@ -1,5 +1,5 @@
 
-import sys
+import sys, re
 
 
 class Tree:
@@ -8,7 +8,7 @@ class Tree:
 		self.visible = visible
 	
 	def __repr__(self):
-		return f"Tree({self.height}, {'#' if self else '_'})"
+		return f"Tree({len(self)}, {bool(self)})"
 	
 	def __len__(self):
 		return int(self.height)
@@ -29,10 +29,17 @@ class Forest:
 		self.columnsNum = len(self.treeGrid[0])
 	
 	def __repr__(self):
-		gridStr = " [" + self.treeGrid[0].__repr__() + "\n"
-		for row in self.treeGrid[1:-1]:
-			gridStr += "  " + row.__repr__() + "\n"
-		gridStr += "  " + self.treeGrid[-1].__repr__() + "]"
+		gridStr = ""
+		for num, row in enumerate(self.treeGrid):
+			if num == 0:
+				gridStr += " ["
+			else:
+				gridStr += "  "
+			gridStr += "".join([ "#" if tree else "_" for tree in row ])
+			if num != self.rowsNum-1:
+				gridStr += "\n"
+			else:
+				gridStr += "]"
 		return f"Forest(\n{gridStr}\n)"
 	
 	def __len__(self):
