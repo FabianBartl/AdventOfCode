@@ -10,7 +10,7 @@ class Directory:
 	
 	def addEntry(self, entry):
 		self.entries.append(entry)
-		self.size += entry.size
+		# self.size += entry.size
 	
 	def getEntry(self, name):
 		for entry in self.entries:
@@ -18,15 +18,15 @@ class Directory:
 				return entry
 	
 	def printTree(self, depth=0):
-		print(f"{'  '*depth}{self.__repr__()}")
+		print(f"{'  '*depth}- {self.name} (dir, size={self.size})")
 		for entry in self.entries:
 			if type(entry) is File:
-				print(f"{'  '*(depth+1)}{entry.__repr__()}")
+				print(f"{'  '*(depth+1)}- {entry.name} (file, size={entry.size})")
 			else:
 				entry.printTree(depth+1)
 	
 	def __repr__(self):
-		return f"- {self.name} (dir, size={self.size})"
+		return f"Directory('{self.name}')"
 
 class File:
 	def __init__(self, name, parent, size=0):
@@ -35,7 +35,30 @@ class File:
 		self.parent = parent
 	
 	def __repr__(self):
-		return f"- {self.name} (file, size={self.size})"
+		return f"File('{self.name}')"
+
+
+def getDeepestDirs(dir, deepestDirs, currDepth=0):
+	noDirs = True
+	for entry in dir.entries:
+		if type(entry) is Directory:
+			if deeperDir := getDeepestDirs(entry, deepestDirs, currDepth+1):
+				deepestDirs.append(deeperDir)
+			noDirs = False
+	if noDirs:
+		return dir, currDepth
+
+def getAllDirs(dir, allDirs, currDepth=0):
+	for entry in dir.entries:
+		if type(entry) is Directory:
+			allDirs.append(getAllDirs(entry, allDirs, currDepth+1))
+	return dir, currDepth
+
+def getEntrySize(entry):
+	if type(entry) is File:
+		return entry.size
+	else:
+		return sum(map(getEntrySize, entry.entries))
 
 
 def main():
@@ -70,18 +93,28 @@ def main():
 			else:
 				currentDir.addEntry(File(args[1], currentDir, int(args[0])))
 	
-	rootDir.printTree()
+	# get every local deepest directory, sorted by depth
+	deepestDirs = []
+	getDeepestDirs(rootDir, deepestDirs)
+	deepestDirs.sort(reverse=True, key=lambda x: x[1])
 	
-	# solve it
+	# get size of every directory
+	rootDir.size = getEntrySize(rootDir)
+	allDirs = []
+	getAllDirs(rootDir, allDirs)
+	for dir, _ in allDirs:
+		dir.size = getEntrySize(dir)
+	
+	# Part 1: get sum of sizes of all directories smaller than 100_000
 	maxSize = 100_000
-	bigSizes = []
-	for entry in rootDir.entries:
-		if type(entry) is Directory:
-			if entry.size < maxSize:
-				bigSizes.append(entry.size)
+	totalSize = 0
+	for dir, _ in allDirs:
+		if dir.size <= maxSize:
+			totalSize += dir.size
 	
 	# result
-	print("Part 1:")
+	rootDir.printTree()
+	print("Part 1:", totalSize)
 
 
 if __name__ == "__main__":
