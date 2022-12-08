@@ -93,11 +93,6 @@ def main():
 			else:
 				currentDir.addEntry(File(args[1], currentDir, int(args[0])))
 	
-	# get every local deepest directory, sorted by depth
-	deepestDirs = []
-	getDeepestDirs(rootDir, deepestDirs)
-	deepestDirs.sort(reverse=True, key=lambda x: x[1])
-	
 	# get size of every directory
 	rootDir.size = getEntrySize(rootDir)
 	allDirs = []
@@ -111,6 +106,8 @@ def main():
 	for dir, _ in allDirs:
 		if dir.size <= maxSize:
 			totalSize += dir.size
+	
+	# Part 2: 
 	
 	# result
 	rootDir.printTree()
