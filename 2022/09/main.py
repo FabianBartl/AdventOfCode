@@ -7,10 +7,10 @@ class Grid:
 		self.cellGrid = cellGrid
 	
 	def render(self, start, rope):
-		minX, maxX = self.max(start)
-		minY, maxY = self.min(start)
-		for y in range(maxY-1, minY+1, -1):
-			for x in range(minX-1, maxX+1):
+		minX, maxX = -1, 10
+		minY, maxY = -1, 10
+		for y in range(maxY, minY, -1):
+			for x in range(minX, maxX):
 				if (x,y) == rope.head:
 					cell = "H"
 				elif (x,y) == rope.tail:
@@ -24,20 +24,6 @@ class Grid:
 	
 	def __repr__(self):
 		return f"Grid(cellGrid={self.cellGrid.__repr__()})"
-	
-	def min(self, start=(0,0)):
-		minX, minY = start
-		for x, y in self.cellGrid:
-			if x < minX and y < minY:
-				minX, minY = x, y
-		return minX, minY
-	
-	def max(self, start=(0,0)):
-		maxX, maxY = start
-		for x, y in self.cellGrid:
-			if x > maxX and y > maxY:
-				maxX, maxY = x, y
-		return maxX, maxY
 	
 	def __getitem__(self, xy):
 		(xy := list(xy)).append(None)
@@ -116,9 +102,9 @@ def main():
 		rope.update(grid)
 		grid[rope.tail] = True
 
-		# grid.render(start, rope)
-		# print(direction, rope, grid, sep="\n")
-		# input()
+		grid.render(start, rope)
+		print(direction, rope, grid, sep="\n")
+		input()
 	
 	grid.render(start, rope)
 	
