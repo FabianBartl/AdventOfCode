@@ -130,7 +130,7 @@ def main():
 	start = (0,0)
 	sleepTime = 0.000_1
 	
-	if input("Part 1? [Y]es").upper() == "Y":
+	if input("Part 1? [Y]es: ").upper() == "Y":
 		# Part 1:
 		grid = Grid({start: True})
 		rope = Rope([start] * 2)
@@ -148,7 +148,7 @@ def main():
 		grid.render(start, rope, size)
 		print("Part 1:", len(grid))
 	
-	if input("Part 2? [Y]es").upper() == "Y":
+	if input("Part 2? [Y]es: ").upper() == "Y":
 		# Part 2:
 		grid = Grid({start: True})
 		rope = Rope([start] * 10)
