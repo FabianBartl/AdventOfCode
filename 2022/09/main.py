@@ -7,8 +7,8 @@ class Grid:
 		self.cellGrid = cellGrid
 	
 	def render(self, start, rope, size=(10,)*4):
-		minX, minY = rope.head[0]-size[0], rope.head[1]-size[1]
-		maxX, maxY = rope.head[0]+size[2], rope.head[1]+size[3]
+		minX, maxX = rope.head[0]-size[0], rope.head[0]+size[1]
+		minY, maxY = rope.head[1]-size[2], rope.head[1]+size[3]
 		for y in range(maxY, minY, -1):
 			for x in range(minX, maxX):
 				cell = "#" if self.cellGrid.get((x,y)) else "."
@@ -115,7 +115,9 @@ def main():
 			line = line.strip().split(" ")
 			movements.extend([ line[0] for _ in range(int(line[1])) ])
 	
-	size = (int(sys.argv[2]),)*4 if len(sys.argv) >= 3 else (10,)*4
+	sizeX = (int(sys.argv[2]),)*2 if len(sys.argv) >= 3 else (10,)*2
+	sizeY = (int(sys.argv[3]),)*2 if len(sys.argv) >= 4 else (10,)*2
+	size = (*sizeX, *sizeY)
 	start = (0,0)
 	sleepTime = 0.000_1
 	
