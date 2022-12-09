@@ -1,5 +1,5 @@
 
-import sys, time
+import sys, time, random
 
 
 class Grid:
@@ -105,15 +105,24 @@ class Rope:
 
 
 def main():
-	# read data file
 	inputFile = sys.argv[1] if len(sys.argv) >= 2 else "example.txt"
 	movements = []
-	with open(inputFile, "r") as fobj:
-		lines = fobj.readlines()
-		
-		for line in lines:
-			line = line.strip().split(" ")
-			movements.extend([ line[0] for _ in range(int(line[1])) ])
+	
+	if inputFile.split("_")[0] != "RANDOM":
+		# read data file
+		with open(inputFile, "r") as fobj:
+			lines = fobj.readlines()
+			
+			for line in lines:
+				line = line.strip().split(" ")
+				movements.extend([ line[0] for _ in range(int(line[1])) ])
+	
+	else:
+		# generate random movement
+		moveCount = int(inputFile.split("_")[1])
+		directions = ["R", "U", "L", "D"]
+		for _ in range(moveCount):
+			movements.append(random.choice(directions))
 	
 	sizeX = (int(sys.argv[2]),)*2 if len(sys.argv) >= 3 else (10,)*2
 	sizeY = (int(sys.argv[3]),)*2 if len(sys.argv) >= 4 else (10,)*2
@@ -121,43 +130,41 @@ def main():
 	start = (0,0)
 	sleepTime = 0.000_1
 	
-	# Part 1:
-	grid = Grid({start: True})
-	rope = Rope([start] * 2)
-	
-	# do movement
-	for index, direction in enumerate(movements):
-		rope.move(direction, grid)
-		rope.update(grid)
-		grid[rope.tail] = True
+	if input("Part 1?") == "1":
+		# Part 1:
+		grid = Grid({start: True})
+		rope = Rope([start] * 2)
+		
+		# do movement
+		for index, direction in enumerate(movements):
+			rope.move(direction, grid)
+			rope.update(grid)
+			grid[rope.tail] = True
 
-		print(f"{index} / {len(movements)-1}")
+			print(f"{index} / {len(movements)-1}")
+			grid.render(start, rope, size)
+			time.sleep(sleepTime)
+		
 		grid.render(start, rope, size)
-		time.sleep(sleepTime)
+		print("Part 1:", len(grid))
 	
-	grid.render(start, rope, size)
-	result1 = len(grid)
-	
-	# Part 2:
-	grid = Grid({start: True})
-	rope = Rope([start] * 10)
-	
-	# do movement
-	for index, direction in enumerate(movements):
-		rope.move(direction, grid)
-		rope.update(grid)
-		grid[rope.tail] = True
+	if input("Part 2?") == "1":
+		# Part 2:
+		grid = Grid({start: True})
+		rope = Rope([start] * 10)
+		
+		# do movement
+		for index, direction in enumerate(movements):
+			rope.move(direction, grid)
+			rope.update(grid)
+			grid[rope.tail] = True
 
-		print(f"{index} / {len(movements)-1}")
+			print(f"{index} / {len(movements)-1}")
+			grid.render(start, rope, size)
+			time.sleep(sleepTime)
+		
 		grid.render(start, rope, size)
-		time.sleep(sleepTime)
-	
-	grid.render(start, rope, size)
-	result2 = len(grid)
-	
-	# results
-	print("Part 1:", result1)
-	print("Part 2:", result2)
+		print("Part 2:", len(grid))
 
 
 if __name__ == "__main__":
