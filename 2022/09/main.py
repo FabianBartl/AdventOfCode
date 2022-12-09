@@ -103,6 +103,10 @@ class Rope:
 		self.updateHead()
 		self.updateTail()
 
+def flattenMovements(moves):
+	moves = moves.split(" ")
+	return [moves[0]] * int(moves[1])
+
 
 def main():
 	inputFile = sys.argv[1] if len(sys.argv) >= 2 else "example.txt"
@@ -112,17 +116,18 @@ def main():
 		# read data file
 		with open(inputFile, "r") as fobj:
 			lines = fobj.readlines()
-			
 			for line in lines:
-				line = line.strip().split(" ")
-				movements.extend([ line[0] for _ in range(int(line[1])) ])
+				line = line.strip()
+				movements.extend(flattenMovements(line))
 	
 	else:
 		# generate random movement
 		moveCount = int(inputFile.split("_")[1])
 		directions = ["R", "U", "L", "D"]
 		for _ in range(moveCount):
-			movements.append(random.choice(directions))
+			direction = random.choice(directions)
+			count = random.randint(1, 9)
+			movements.extend(flattenMovements(f"{direction} {count}"))
 	
 	sizeX = (int(sys.argv[2]),)*2 if len(sys.argv) >= 3 else (10,)*2
 	sizeY = (int(sys.argv[3]),)*2 if len(sys.argv) >= 4 else (10,)*2
