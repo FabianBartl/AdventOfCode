@@ -11,14 +11,16 @@ class Grid:
 		maxX, maxY = maxXY
 		for y in range(maxY, minY, -1):
 			for x in range(minX, maxX):
+				cell = "#" if self.cellGrid.get((x,y)) else "."
+				if (x,y) == start:
+					cell = "s"
+				if (x,y) == rope.tail:
+					cell = "T"
+				for index, knot in enumerate(rope[1:-1], 1):
+					if (x,y) == knot:
+						cell = str(index)
 				if (x,y) == rope.head:
 					cell = "H"
-				elif (x,y) == rope.tail:
-					cell = "T"
-				elif (x,y) == start:
-					cell = "s"
-				else:
-					cell = "#" if self.cellGrid.get((x,y)) else "."
 				print(cell, end="")
 			print("\n", end="")
 	
@@ -64,29 +66,42 @@ class Rope:
 		self.updateHead()
 	
 	def update(self, grid):
-		xDiff, yDiff = self.head[0]-self.tail[0], self.head[1]-self.tail[1]
-		self.tail = list(self.tail)
-		if xDiff > 1:
-			self.tail[0] += 1
-		elif xDiff < -1:
-			self.tail[0] -= 1
-		elif yDiff > 1:
-			self.tail[1] += 1
-		elif yDiff < -1:
-			self.tail[1] -= 1
-		if yDiff > 1 and (xDiff == 1 or xDiff == -1):
-			self.tail[0] += xDiff
-		elif yDiff < -1 and (xDiff == 1 or xDiff == -1):
-			self.tail[0] += xDiff
-		elif xDiff > 1 and (yDiff == 1 or yDiff == -1):
-			self.tail[1] += yDiff
-		elif xDiff < -1 and (yDiff == 1 or yDiff == -1):
-			self.tail[1] += yDiff
-		self.tail = tuple(self.tail)
+		for index, knot in enumerate(self.knots[1:], 1):
+			subHead = self.knots[index-1]
+			subTail = list(knot)
+			xDiff, yDiff = subHead[0]-subTail[0], subHead[1]-subTail[1]
+			if xDiff > 1:
+				subTail[0] += 1
+			elif xDiff < -1:
+				subTail[0] -= 1
+			elif yDiff > 1:
+				subTail[1] += 1
+			elif yDiff < -1:
+				subTail[1] -= 1
+			if yDiff > 1 and (xDiff == 1 or xDiff == -1):
+				subTail[0] += xDiff
+			elif yDiff < -1 and (xDiff == 1 or xDiff == -1):
+				subTail[0] += xDiff
+			elif xDiff > 1 and (yDiff == 1 or yDiff == -1):
+				subTail[1] += yDiff
+			elif xDiff < -1 and (yDiff == 1 or yDiff == -1):
+				subTail[1] += yDiff
+			self.knots[index] = tuple(subTail)
 		self.updateTail()
 
 	def __len__(self):
 		return max(self.head[0]-self.tail[0], self.head[1]-self.tail[1])
+
+	def __iter__(self):
+		return iter(self.knots)
+
+	def __getitem__(self, knot):
+		return self.knots[knot]
+
+	def __setitem__(self, knot, value):
+		self.knots[knot] = value
+		self.updateHead()
+		self.updateTail()
 
 
 def main():
@@ -102,8 +117,10 @@ def main():
 	
 	start = (0,0)
 	minXY, maxXY = (-20,-20), (20,20)
+	
+	# Part 1:
 	grid = Grid({start: True})
-	rope = Rope([start, start])
+	rope = Rope([start] * 2)
 	
 	# do movement
 	for index, direction in enumerate(movements):
@@ -114,13 +131,30 @@ def main():
 		print(f"{index} / {len(movements)-1}")
 		grid.render(start, rope, minXY, maxXY)
 		time.sleep(0.1)
-		# print(direction, rope, grid, sep="\n")
-		# input()
 	
 	grid.render(start, rope, minXY, maxXY)
+	result1 = len(grid)
+	
+	# Part 2:
+	grid = Grid({start: True})
+	rope = Rope([start] * 10)
+	
+	# do movement
+	for index, direction in enumerate(movements):
+		rope.move(direction, grid)
+		rope.update(grid)
+		grid[rope.tail] = True
+
+		print(f"{index} / {len(movements)-1}")
+		grid.render(start, rope, minXY, maxXY)
+		time.sleep(0.1)
+	
+	grid.render(start, rope, minXY, maxXY)
+	result2 = len(grid)
 	
 	# results
-	print("Part 1:", len(grid))
+	print("Part 1:", result1)
+	print("Part 2:", result2)
 
 
 if __name__ == "__main__":
