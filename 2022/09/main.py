@@ -109,6 +109,7 @@ def flattenMovements(moves):
 
 
 def main():
+	# Bsp.: main.py RANDOM_100 60 25
 	inputFile = sys.argv[1] if len(sys.argv) >= 2 else "example.txt"
 	movements = []
 	
