@@ -6,9 +6,9 @@ class Grid:
 	def __init__(self, cellGrid=dict()):
 		self.cellGrid = cellGrid
 	
-	def render(self, start, rope, minXY=(-1,-2), maxXY=(6,5)):
-		minX, minY = minXY
-		maxX, maxY = maxXY
+	def render(self, start, rope, size=(10,)*4):
+		minX, minY = rope.head[0]-size[0], rope.head[1]-size[1]
+		maxX, maxY = rope.head[0]+size[2], rope.head[1]+size[3]
 		for y in range(maxY, minY, -1):
 			for x in range(minX, maxX):
 				cell = "#" if self.cellGrid.get((x,y)) else "."
@@ -115,8 +115,9 @@ def main():
 			line = line.strip().split(" ")
 			movements.extend([ line[0] for _ in range(int(line[1])) ])
 	
+	size = (int(sys.argv[2]),)*4 if len(sys.argv) >= 3 else (10,)*4
 	start = (0,0)
-	minXY, maxXY = (-20,-20), (20,20)
+	sleepTime = 0.01
 	
 	# Part 1:
 	grid = Grid({start: True})
@@ -129,10 +130,10 @@ def main():
 		grid[rope.tail] = True
 
 		print(f"{index} / {len(movements)-1}")
-		grid.render(start, rope, minXY, maxXY)
-		time.sleep(0.1)
+		grid.render(start, rope, size)
+		time.sleep(sleepTime)
 	
-	grid.render(start, rope, minXY, maxXY)
+	grid.render(start, rope, size)
 	result1 = len(grid)
 	
 	# Part 2:
@@ -146,10 +147,10 @@ def main():
 		grid[rope.tail] = True
 
 		print(f"{index} / {len(movements)-1}")
-		grid.render(start, rope, minXY, maxXY)
-		time.sleep(0.1)
+		grid.render(start, rope, size)
+		time.sleep(sleepTime)
 	
-	grid.render(start, rope, minXY, maxXY)
+	grid.render(start, rope, size)
 	result2 = len(grid)
 	
 	# results
