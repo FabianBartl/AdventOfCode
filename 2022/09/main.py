@@ -1,14 +1,14 @@
 
-import sys
+import sys, time
 
 
 class Grid:
 	def __init__(self, cellGrid=dict()):
 		self.cellGrid = cellGrid
 	
-	def render(self, start, rope):
-		minX, maxX = -1, 10
-		minY, maxY = -1, 10
+	def render(self, start, rope, minXY=(-1,-2), maxXY=(6,5)):
+		minX, minY = minXY
+		maxX, maxY = maxXY
 		for y in range(maxY, minY, -1):
 			for x in range(minX, maxX):
 				if (x,y) == rope.head:
@@ -36,24 +36,32 @@ class Grid:
 		return len(self.cellGrid)
 
 class Rope:
-	def __init__(self, head, tail):
-		self.head = head
-		self.tail = tail
+	def __init__(self, knots):
+		self.knots = knots
+		self.head = self.knots[0]
+		self.tail = self.knots[-1]
 	
 	def __repr__(self):
-		return f"Rope(head={self.head}, tail={self.tail})"
+		return f"Rope(knots={self.knots})"
+	
+	def updateHead(self):
+		self.head = self.knots[0]
+	
+	def updateTail(self):
+		self.tail = self.knots[-1]
 	
 	def move(self, direction, grid):
-		self.head = list(self.head)
+		head = list(self.knots[0])
 		if direction == "R":
-			self.head[0] += 1
+			head[0] += 1
 		elif direction == "U":
-			self.head[1] += 1
+			head[1] += 1
 		elif direction == "L":
-			self.head[0] -= 1	
+			head[0] -= 1	
 		elif direction == "D":
-			self.head[1] -= 1
-		self.head = tuple(self.head)
+			head[1] -= 1
+		self.knots[0] = tuple(head)
+		self.updateHead()
 	
 	def update(self, grid):
 		xDiff, yDiff = self.head[0]-self.tail[0], self.head[1]-self.tail[1]
@@ -66,7 +74,6 @@ class Rope:
 			self.tail[1] += 1
 		elif yDiff < -1:
 			self.tail[1] -= 1
-		
 		if yDiff > 1 and (xDiff == 1 or xDiff == -1):
 			self.tail[0] += xDiff
 		elif yDiff < -1 and (xDiff == 1 or xDiff == -1):
@@ -76,6 +83,7 @@ class Rope:
 		elif xDiff < -1 and (yDiff == 1 or yDiff == -1):
 			self.tail[1] += yDiff
 		self.tail = tuple(self.tail)
+		self.updateTail()
 
 	def __len__(self):
 		return max(self.head[0]-self.tail[0], self.head[1]-self.tail[1])
@@ -93,20 +101,23 @@ def main():
 			movements.extend([ line[0] for _ in range(int(line[1])) ])
 	
 	start = (0,0)
+	minXY, maxXY = (-20,-20), (20,20)
 	grid = Grid({start: True})
-	rope = Rope(start, start)
+	rope = Rope([start, start])
 	
 	# do movement
-	for direction in movements:
+	for index, direction in enumerate(movements):
 		rope.move(direction, grid)
 		rope.update(grid)
 		grid[rope.tail] = True
 
-		grid.render(start, rope)
-		print(direction, rope, grid, sep="\n")
-		input()
+		print(f"{index} / {len(movements)-1}")
+		grid.render(start, rope, minXY, maxXY)
+		time.sleep(0.1)
+		# print(direction, rope, grid, sep="\n")
+		# input()
 	
-	grid.render(start, rope)
+	grid.render(start, rope, minXY, maxXY)
 	
 	# results
 	print("Part 1:", len(grid))
