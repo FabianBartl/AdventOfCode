@@ -117,7 +117,7 @@ def main():
 	
 	size = (int(sys.argv[2]),)*4 if len(sys.argv) >= 3 else (10,)*4
 	start = (0,0)
-	sleepTime = 0.01
+	sleepTime = 0.000_1
 	
 	# Part 1:
 	grid = Grid({start: True})
