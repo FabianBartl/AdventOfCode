@@ -6,21 +6,25 @@ class Grid:
 	def __init__(self, cellGrid=dict()):
 		self.cellGrid = cellGrid
 	
-	def render(self, start, rope, size=(10,)*4):
+	def render(self, start, rope, size=(10,)*4, style="ascii"):
+		if style.lower() == "dos":
+			charSet = {"head": "▪", "tail": "■", "start": "○", "knots": lambda _: "█", "space": " ", "visited": "░"}
+		else:
+			charSet = {"head": "H", "tail": "T", "start": "s", "knots": lambda x: f"{x}", "space": ".", "visited": "#"}
 		minX, maxX = rope.head[0]-size[0], rope.head[0]+size[1]
 		minY, maxY = rope.head[1]-size[2], rope.head[1]+size[3]
 		for y in range(maxY, minY, -1):
 			for x in range(minX, maxX):
-				cell = "#" if self.cellGrid.get((x,y)) else "."
+				cell = charSet["visited"] if self.cellGrid.get((x,y)) else charSet["space"]
 				if (x,y) == start:
-					cell = "s"
+					cell = charSet["start"]
 				if (x,y) == rope.tail:
-					cell = "T"
+					cell = charSet["tail"]
 				for index, knot in enumerate(rope[1:-1], 1):
 					if (x,y) == knot:
-						cell = str(index)
+						cell = charSet["knots"](index)
 				if (x,y) == rope.head:
-					cell = "H"
+					cell = charSet["head"]
 				print(cell, end="")
 			print("\n", end="")
 	
@@ -135,6 +139,7 @@ def main():
 	size = (*sizeX, *sizeY)
 	start = (0,0)
 	sleepTime = 0.000_1
+	charSet = "dos"
 	
 	if input("Part 1? [Y]es: ").upper() == "Y":
 		# Part 1:
@@ -142,17 +147,20 @@ def main():
 		rope = Rope([start] * 2)
 		
 		# do movement
+		ts = 0
 		for index, direction in enumerate(movements):
 			rope.move(direction, grid)
 			rope.update(grid)
 			grid[rope.tail] = True
 
 			print(f"{index} / {len(movements)-1}")
-			grid.render(start, rope, size)
+			t0 = time.time()
+			grid.render(start, rope, size, charSet)
+			ts += time.time() - t0
 			time.sleep(sleepTime)
 		
-		grid.render(start, rope, size)
-		print("Part 1:", len(grid))
+		grid.render(start, rope, size, charSet)
+		print("Part 1:", len(grid), "\tFPS:", 1 / (ts / len(movements)))
 	
 	if input("Part 2? [Y]es: ").upper() == "Y":
 		# Part 2:
@@ -160,17 +168,20 @@ def main():
 		rope = Rope([start] * 10)
 		
 		# do movement
+		ts = 0
 		for index, direction in enumerate(movements):
 			rope.move(direction, grid)
 			rope.update(grid)
 			grid[rope.tail] = True
 
 			print(f"{index} / {len(movements)-1}")
-			grid.render(start, rope, size)
+			t0 = time.time()
+			grid.render(start, rope, size, charSet)
+			ts += time.time() - t0
 			time.sleep(sleepTime)
 		
-		grid.render(start, rope, size)
-		print("Part 2:", len(grid))
+		grid.render(start, rope, size, charSet)
+		print("Part 2:", len(grid), "\tFPS:", 1 / (ts / len(movements)))
 
 
 if __name__ == "__main__":
