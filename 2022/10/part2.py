@@ -13,7 +13,13 @@ class Machine:
 			self.screen[self.cycle] = True
 		if value is not None:
 			self.regX += value
-		self.cycle += 1
+		# check for new screen
+		if self.cycle >= 240:
+			self.regX = 0
+			self.cycle = 0
+			self.screen = [False] * 240
+		else:
+			self.cycle += 1
 	
 	def render(self):
 		for pos in range(0, 240):
