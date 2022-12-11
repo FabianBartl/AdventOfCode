@@ -20,7 +20,7 @@ class Monkey:
 		self.items.append(item)
 	
 	def __repr__(self):
-		return f"{self.__class__.__name__}(name='{self.name}', items={self.items}, operation={self.operation}, test={self.test}, decision={self.decision})"
+		return f"Monkey(name='{self.name}', items={self.items}, operation={self.operation}, test={self.test}, decision={'{'}True: Monkey(name='{self.decision[True].name}'), False: Monkey(name='{self.decision[False].name}'){'}'})"
 
 
 def parseMonkey(lines):
@@ -54,6 +54,13 @@ def main():
 		monkey.decision[False] = monkeys[ int(monkey.decision[False]) ]
 
 	print(monkeys)
+	
+	# do rounds
+	for roundNum in range(20):
+		
+		# do turns
+		for monkey in monkeys:
+			pass
 	
 	# result
 	print("Part 1:")
