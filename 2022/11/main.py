@@ -68,9 +68,10 @@ def main(monkeys, rounds, relieved, part):
 	# monkeys.sort( key=lambda x: x.inspections, reverse=True )
 	# monkeyBusiness = monkeys[0].inspections * monkeys[1].inspections
 	
-	monkeyBusiness = max(monkeys, key=lambda x: x.inspections)
-	monkeys.pop( monkeys.index(monkeyBusiness) )
-	monkeyBusiness *= max(monkeys, key=lambda x: x.inspections)
+	maxMonkey = max(monkeys, key=lambda x: x.inspections)
+	monkeyBusiness = maxMonkey.inspections
+	monkeys.pop(monkeys.index(maxMonkey))
+	monkeyBusiness *= max(monkeys, key=lambda x: x.inspections).inspections
 	
 	# result
 	print(f"\nPart {part}: {monkeyBusiness}\n\n")
