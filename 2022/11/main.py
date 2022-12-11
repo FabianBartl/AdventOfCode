@@ -54,9 +54,9 @@ def main(monkeys, rounds, relieved, part):
 		monkey.decision[True ] = monkeys[ int(monkey.decision[True ]) ]
 		monkey.decision[False] = monkeys[ int(monkey.decision[False]) ]
 
-	# do all rounds
+	# do rounds
 	for roundNum in tqdm(range(rounds), desc="Rounds"):
-		# do round
+		# do monkeys
 		for monkey in monkeys:
 			# do turns
 			while len(monkey.items) > 0:
