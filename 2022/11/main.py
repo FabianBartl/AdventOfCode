@@ -59,11 +59,11 @@ def main(monkeys, rounds, relieved, part):
 		# do monkeys
 		for monkey in monkeys:
 			# do turns
-			while len(monkey.items) > 0:
+			for _ in range(len(monkey.items)):
 				monkey.inspectAll(relieved)
 	
 	print(f"\nAfter Round: {rounds}")
-	# print("\n" + "\n\n".join([ monkey.__repr__() for monkey in monkeys ]))
+	print("\n" + "\n\n".join([ monkey.__repr__() for monkey in monkeys ]))
 
 	# monkeys.sort( key=lambda x: x.inspections, reverse=True )
 	# monkeyBusiness = monkeys[0].inspections * monkeys[1].inspections
@@ -88,5 +88,7 @@ if __name__ == "__main__":
 		for lineNum in range(monkeyCount):
 			monkeys.append( parseMonkey(lines[lineNum*7:(lineNum+1)*7]) )
 
-	main([ monkey.copy() for monkey in monkeys ],    20, True,  1)
-	main([ monkey.copy() for monkey in monkeys ], 1_000, False, 2)
+	# main([ monkey.copy() for monkey in monkeys ],    20, True,  1)
+	# main([ monkey.copy() for monkey in monkeys ], 1_000, False, 2)
+	
+	main(monkeys, 1_000, False, 2)
