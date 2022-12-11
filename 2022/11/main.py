@@ -18,19 +18,24 @@ class Monkey:
 	
 	def catch(self, item):
 		self.items.append(item)
+	
+	def __repr__(self):
+		return f"{self.__class__.__name__}(name='{self.name}', items={self.items}, operation={self.operation}, test={self.test}, decision={self.decision})"
 
 
 def parseMonkey(lines):
-	print(lines)
 	intPattern = re.compile(r"\d+")
+
 	name = intPattern.findall(lines[0])[0]
 	items = list(map( int, intPattern.findall(lines[1]) ))
-	# operation = 
+	operation = eval(f"lambda old: {lines[2].split('=')[1]}")
 	test = int(intPattern.findall(lines[3])[0])
-	# ifTrue = 
-	# ifFalse = 
-	# decision = {True: , False: }
-
+	ifTrue = int(intPattern.findall(lines[4])[0])
+	ifFalse = int(intPattern.findall(lines[5])[0])
+	decision = {True: ifTrue, False: ifFalse}
+	
+	return Monkey(name, items, operation, test, decision)
+	
 
 def main():
 	# read data file
@@ -40,10 +45,15 @@ def main():
 		
 		monkeyCount = (len(lines)+1) // 7
 		monkeys = []
-		
 		for lineNum in range(monkeyCount):
-			print(lineNum, lineNum+7)
 			monkeys.append( parseMonkey(lines[lineNum*7:(lineNum+1)*7]) )
+	
+	# replace monkey names by Monkey objects in decision dictionary
+	for monkey in monkeys:
+		monkey.decision[True ] = monkeys[ int(monkey.decision[True ]) ]
+		monkey.decision[False] = monkeys[ int(monkey.decision[False]) ]
+
+	print(monkeys)
 	
 	# result
 	print("Part 1:")
