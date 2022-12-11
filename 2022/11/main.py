@@ -63,10 +63,14 @@ def main(monkeys, rounds, relieved, part):
 				monkey.inspectAll(relieved)
 	
 	print(f"\nAfter Round: {rounds}")
-	print("\n" + "\n\n".join([ monkey.__repr__() for monkey in monkeys ]))
+	# print("\n" + "\n\n".join([ monkey.__repr__() for monkey in monkeys ]))
 
-	monkeys.sort( key=lambda x: x.inspections, reverse=True )
-	monkeyBusiness = monkeys[0].inspections * monkeys[1].inspections
+	# monkeys.sort( key=lambda x: x.inspections, reverse=True )
+	# monkeyBusiness = monkeys[0].inspections * monkeys[1].inspections
+	
+	monkeyBusiness = max(monkeys, key=lambda x: x.inspections)
+	monkeys.pop( monkeys.index(monkeyBusiness) )
+	monkeyBusiness *= max(monkeys, key=lambda x: x.inspections)
 	
 	# result
 	print(f"\nPart {part}: {monkeyBusiness}\n\n")
