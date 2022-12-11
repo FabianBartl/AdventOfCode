@@ -9,18 +9,24 @@ class Monkey:
 		self.operation : object            = operation  # lambda function
 		self.test      : int               = test
 		self.decision  : dict[bool:Monkey] = decision
+		self.inspections = 0
 	
 	def inspect(self):
-		worryLvl = self.items.pop(0)
-		worryLvl = self.operation(worryLvl)
-		worryLvl //= 3
-		decision[ worryLvl % test == 0 ].catch(item)
+		self.inspections += 1
+		item = self.items.pop(0)
+		item = self.operation(item)
+		item //= 3
+		self.decision[ item % self.test == 0 ].catch(item)
+	
+	def inspectAll(self):
+		for _ in range(len(self.items)):
+			self.inspect()
 	
 	def catch(self, item):
 		self.items.append(item)
 	
 	def __repr__(self):
-		return f"Monkey(name='{self.name}', items={self.items}, operation={self.operation}, test={self.test}, decision={'{'}True: Monkey(name='{self.decision[True].name}'), False: Monkey(name='{self.decision[False].name}'){'}'})"
+		return f"Monkey(name='{self.name}', items={self.items}, operation=<lambda function>, test={self.test}, decision={'{'}True: Monkey(name='{self.decision[True].name}'), False: Monkey(name='{self.decision[False].name}'){'}'}, inspections={self.inspections})"
 
 
 def parseMonkey(lines):
@@ -53,17 +59,28 @@ def main():
 		monkey.decision[True ] = monkeys[ int(monkey.decision[True ]) ]
 		monkey.decision[False] = monkeys[ int(monkey.decision[False]) ]
 
-	print(monkeys)
+	print(monkeys, "\n")
 	
-	# do rounds
-	for roundNum in range(20):
-		
-		# do turns
+	# repeat it
+	rounds = 20
+	for roundNum in range(rounds):
+		print("\n\nAfter Round:", roundNum)
+		print("\n" + "\n\n".join([ monkey.__repr__() for monkey in monkeys ]))
+		input()
+		# do round
 		for monkey in monkeys:
-			pass
+			# do turns
+			while len(monkey.items) > 0:
+				monkey.inspectAll()
+	
+	print("\n\nAfter Round:", rounds)
+	print("\n" + "\n\n".join([ monkey.__repr__() for monkey in monkeys ]))
+
+	monkeys.sort( key=lambda x: x.inspections, reverse=True )
+	monkeyBusiness = monkeys[0].inspections * monkeys[1].inspections
 	
 	# result
-	print("Part 1:")
+	print("\nPart 1:", monkeyBusiness)
 
 
 if __name__ == "__main__":
