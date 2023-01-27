@@ -1,0 +1,3 @@
+import sys; print("Part 1:", (totalCalories := ((totalCalories := [], calories := 0), [ (totalCalories.append(calories), calories := 0) if line == "\n" else (calories := calories + int(line)) for line in open(sys.argv[1] if len(sys.argv) >= 2 else "example.txt", "r").readlines() ], totalCalories.append(calories), totalCalories.sort(), totalCalories)[-1])[-1], "\nPart 2:", sum(totalCalories[-3:]))
+# Minimized version:
+import sys;a=sys.argv;p="\nPart";print(p,"1:",(t:=(t:=[],c:=0,[(t.append(c),c:=0)if l=="\n"else(c:=c+int(l))for l in open(a[1]if len(a)>=2else"example.txt").readlines()],t.append(c),sorted(t))[-1])[-1],p,"2:",sum(t[-3:]))
