@@ -2,7 +2,7 @@
 import re, sys
 from collections import namedtuple
 
-Num = namedtuple("written_num", ["pos", "val"])
+Num = namedtuple("Num", ["pos", "val"])
 
 
 def parse_line_p1(line:str) -> int:
