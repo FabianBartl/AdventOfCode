@@ -22,7 +22,7 @@ def solve_part1(lines: list[str]) -> None:
         stats[current] += 1
         print(f"{current=} {stats[current]=}", end=" ")
     
-    print(f"Solution: {stats[0]}")
+    print(f"Solution 1: {stats[0]}")
 
 
 """
@@ -60,7 +60,7 @@ def solve_part2(lines: list[str]) -> None:
         passed_zero += pz
         current = corrected
         
-    print(f"Solution: {passed_zero}")
+    print(f"Solution 2: {passed_zero}")
 """
 
 
@@ -96,7 +96,7 @@ def solve_part2(lines: list[str]) -> None:
             print(f"During this rotation, it points at zero {pz}x.", end=" ")
         print("")
         
-    print(f"Solution: {passed_zero}")
+    print(f"Solution 2: {passed_zero}")
 
 
 def main() -> None:
@@ -105,6 +105,7 @@ def main() -> None:
     with open(inputFile, "r") as fobj:
         lines = [ line.strip() for line in fobj.readlines() ]
 
+    solve_part1(lines)
     solve_part2(lines)
 
 
