@@ -31,24 +31,29 @@ def solve_part1(banks: list[list[int]]) -> None:
 
 
 def solve_part2(banks: list[list[int]]) -> None:
-    start_joltage = 100_000_000_000
-    end_joltage   = 999_999_999_999
+    # start_joltage = 100_000_000_000
+    # end_joltage   = 999_999_999_999
+    # start_joltage = 10_000_000
+    # end_joltage   = 99_999_999
+    start_joltage = 100_000
+    end_joltage   = 999_999
 
     all_found_max = []
     for ind, bank in enumerate(banks):
-        print(f"\n{ind}: {bank=}")
+        banktext = "".join(map(str, bank))
+        print(f"\n{ind}: {banktext}")
         
         found_max = 0
-        for joltage in tqdm(range(end_joltage, start_joltage-1, -1), ):
+        for joltage in range(end_joltage, start_joltage-1, -1):
             
             joltagetext = str(joltage)
             if 0 in set(joltagetext):
                 continue
-            pattern = "\d*".join(list(joltagetext))
+            pattern = r"\d*".join(list(joltagetext))
             
-            if (matched := re.search(pattern, str(bank))) is not None:
+            if (matched := re.search(pattern, banktext)) is not None:
                 found_max = joltage
-                print(f"found match for {joltage=}:", matched)
+                print(f"found match for {joltage}")
                 break
         
         all_found_max.append(found_max)

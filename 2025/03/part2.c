@@ -105,13 +105,14 @@ int bank_contains_joltage(char** bank, unsigned long long* joltage_num) {
         joltage_digit = joltage[ji];
         if (bank_digit == joltage_digit) {
             ji++;
+
+            // match found if end of joltage reached before end of bank
+            if (ji == joltage_len) {
+                free(joltage);
+                return TRUE;
+            }
         }
 
-        // match found if end of joltage reached before end of bank
-        if (ji == joltage_len-1) {
-            free(joltage);
-            return TRUE;
-        }
     }
 
     free(joltage);
@@ -119,30 +120,79 @@ int bank_contains_joltage(char** bank, unsigned long long* joltage_num) {
 }
 
 
+// returns TRUE if the number contains the digit 0
+int contains_digit_zero(unsigned long long num) {
+    while (num > 0) {
+        if (num % 10 == 0) {
+            return TRUE;
+        }
+        num /= 10;
+    }
+    return FALSE;
+}
+
+
+// iterate backwards over all possible joltages until first match with bank
+int find_max_joltage(char** bank, size_t digits, unsigned long long* found_max_joltage) {
+    unsigned long long lower_joltage = (unsigned long long)powf(10.0f, (float)(digits-1));      // 1e(12-1) = 1e11 = 100_000_000_000
+    unsigned long long upper_joltage = (unsigned long long)powf(10.0f, (float)digits) - 1;      // 1e12 - 1 =        999_999_999_999
+
+    for (unsigned long long current_joltage = upper_joltage; current_joltage >= lower_joltage; current_joltage--) {
+        if (contains_digit_zero(current_joltage) == TRUE) {
+            continue;
+        }
+        // printf("%llu ", current_joltage);
+        if (bank_contains_joltage(bank, &current_joltage) == TRUE) {
+            *found_max_joltage = current_joltage;
+            return 0;
+        }
+    }
+
+    return -1;
+}
+
+
 int main(int argc, char** argv) {
     // get input file
-    #define FILEPATH_LEN (size_t)250
-    char filepath[FILEPATH_LEN] = "example.txt";
+    char filepath[250] = "example.txt";
     if (argc > 1) {
-        strncpy(filepath, argv[1], FILEPATH_LEN);
+        strncpy(filepath, argv[1], 250);
     }
 
     // read file
-    char** lines_array = NULL;
+    char** lines_array;
     size_t line_count = 0;
     int ret = read_file((const char*)filepath, &lines_array, &line_count);
 
-    // print file line by line
-    printf("line_count=%lu\n", line_count);
-    for (int i=0; i<line_count; i++) {
-        printf("%i: %s\n", i+1, lines_array[i]);
+    // // print file line by line
+    // printf("line_count=%lu\n", line_count);
+    // for (size_t i=0; i<line_count; i++) {
+    //     printf("%lu: %s\n", i+1, lines_array[i]);
+    // }
+
+    // // testing
+    // char* test_bank = lines_array[0];
+    // unsigned long long test_joltage = 9887654321;
+    // printf("expect %i, it is: %i\n", FALSE, bank_contains_joltage(&test_bank, &test_joltage));
+
+    // get amount of digits to match
+    size_t digits = 12;
+    if (argc > 2) {
+        digits = (size_t)strtoul(argv[2], NULL, 10);
     }
 
-    // solve the problem
-    // ...
-    char* test_bank = lines_array[0];
-    unsigned long long test_joltage = 9887654321;
-    printf("expect %i, it is: %i\n", FALSE, bank_contains_joltage(&test_bank, &test_joltage));
+    // solve the file
+    char** bank;
+    unsigned long long total_max_joltage = 0ULL;
+    unsigned long long found_max_joltage = 0ULL;
+    for (size_t i=0; i<line_count; i++) {
+        bank = &(lines_array[i]);
+        printf("%lu: %s\n", i+1, *bank);
+
+        find_max_joltage(bank, digits, &found_max_joltage);
+        printf("found max joltage: %llu\n", found_max_joltage);
+        total_max_joltage += found_max_joltage;
+    }
 
     // memory cleanup
     if (lines_array) {
