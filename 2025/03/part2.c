@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include <math.h>
-#include <regex.h>
 #include <omp.h>
 
 
@@ -189,35 +188,40 @@ int main(int argc, char** argv) {
     size_t line_count = 0;
     int ret = read_file((const char*)filepath, &lines_array, &line_count);
 
-    // // print file line by line
-    // printf("line_count=%lu\n", line_count);
-    // for (size_t i=0; i<line_count; i++) {
-    //     printf("%lu: %s\n", i+1, lines_array[i]);
-    // }
-
-    // // testing
-    // char* test_bank = lines_array[0];
-    // unsigned long long test_joltage = 9887654321;
-    // printf("expect %i, it is: %i\n", FALSE, bank_contains_joltage(&test_bank, &test_joltage));
-
     // get amount of digits to match
     size_t digits = 12;
     if (argc > 2) {
         digits = (size_t)strtoul(argv[2], NULL, 10);
+        if (digits > MAX_DIGITS) {
+            printf("limit digits from %lu to %lu\n", digits, MAX_DIGITS);
+            digits = MAX_DIGITS;
+        }
     }
 
-    // solve the file
+    // solve the file parallalized
     char** bank;
     unsigned long long total_max_joltage = 0ULL;
-    unsigned long long found_max_joltage = 0ULL;
+    unsigned long long found_max_joltage;
+    
+    int nthreads, tid;
+    #pragma omp parallel for \
+        schedule(dynamic, 1) \
+        reduction(+:total_max_joltage) \
+        private(bank, found_max_joltage, tid) \
+        shared(line_count, lines_array, digits)
+    
     for (size_t i=0; i<line_count; i++) {
+        tid = omp_get_thread_num();
         bank = &(lines_array[i]);
-        printf("%lu: %s\n", i+1, *bank);
+        printf("[%i] %lu: %s\n", tid, i+1, *bank);
 
         find_max_joltage(bank, strlen(*bank), digits, &found_max_joltage);
-        printf("found max joltage: %llu\n", found_max_joltage);
+        printf("[%i] %lu: found max joltage: %llu\n", tid, i+1, found_max_joltage);
+
         total_max_joltage += found_max_joltage;
     }
+
+    printf("Solution: %llu\n", total_max_joltage);
 
     // memory cleanup
     if (lines_array) {
