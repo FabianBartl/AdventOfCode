@@ -7,6 +7,8 @@
 #include <omp.h>
 
 
+#define max(a,b) (a>b ? a : b)
+
 #define FALSE 0
 #define TRUE 1
 #define SUCCESS 0
@@ -100,9 +102,20 @@ void reverse_string(char** string, size_t string_len) {
 }
 
 
-// split integer into an array of digits and returns FALSE if it contains a zero
-int split_to_digits(unsigned long long num, char** digits, size_t digits_len, size_t* digit_count) {
-    char contains_zero = FALSE;
+// return TRUE if string contains char
+int str_contains_char(const char *string, char c, size_t str_len) {
+    for (size_t i=0; i<str_len; i++) {
+        if (string[i] == c) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+
+// split integer into an array of digits and returns FALSE if it contains an disallowed digit
+int split_to_digits(unsigned long long num, char** digits, size_t digits_len, size_t* digit_count, const char* allowed_digits, size_t allowed_digits_len) {
+    char contains_disallowed_chars = FALSE;
     char digit;
     size_t buff_ind = 0;
 
@@ -113,17 +126,18 @@ int split_to_digits(unsigned long long num, char** digits, size_t digits_len, si
         }
         
         // get ascii value for current digit
-        digit = num % 10ULL;
-        if (digit == 0ULL) {
-            contains_zero = TRUE;
-        }
-        (*digits)[buff_ind++] = (char)('0' + digit);     // offset digit into ascii area to get char
+        digit = (char)('0' + (num % 10ULL));
+        (*digits)[buff_ind++] = digit;
         num /= 10ULL;
+
+        if (str_contains_char(allowed_digits, digit, allowed_digits_len) == FALSE) {
+            contains_disallowed_chars = TRUE;
+        }
     }
 
     reverse_string(digits, buff_ind);
     *digit_count = buff_ind;
-    return !contains_zero;
+    return !contains_disallowed_chars;
 }
 
 
@@ -151,28 +165,57 @@ int bank_contains_joltage(char** bank, char** joltage, size_t bank_len, size_t j
 }
 
 
-// iterate backwards over all possible joltages until first match with bank
+// iterate over all possible joltages until first match with bank, returns SUCCESS if a max was found
 int find_max_joltage(char** bank, size_t bank_len, size_t joltage_len, unsigned long long* found_max_joltage) {
     unsigned long long lower_joltage = (unsigned long long)powf(10.0f, (float)(joltage_len-1));      // 1e(12-1) = 1e11 = 100_000_000_000
     unsigned long long upper_joltage = (unsigned long long)powf(10.0f, (float)joltage_len) - 1;      // 1e12 - 1 =        999_999_999_999
-    
-    char* joltage = malloc(joltage_len);
+
+    unsigned long long global_max_joltage = 0ULL;
+    *found_max_joltage = global_max_joltage;
     size_t true_joltage_len;
-    for (unsigned long long joltage_num = upper_joltage; joltage_num >= lower_joltage; joltage_num--) {
-        // convert joltage to string and check for zeros
-        if (split_to_digits(joltage_num, &joltage, joltage_len, &true_joltage_len) == FALSE) {
-            continue;
-        }
-        
-        if (bank_contains_joltage(bank, &joltage, bank_len, true_joltage_len) == TRUE) {
-            *found_max_joltage = joltage_num;
-            free(joltage);
-            return SUCCESS;
+
+    // get all digits used by the bank
+    size_t true_used_digits_len = 0;
+    char used_digits[11] = {(*bank)[0]};
+
+    for (size_t bi=1; bi<bank_len; bi++) {
+        char current_digit = (*bank)[bi];
+        if (str_contains_char(used_digits, current_digit, true_used_digits_len) == FALSE) {
+            if (true_used_digits_len < 10) {
+                used_digits[true_used_digits_len] = current_digit;
+                used_digits[++true_used_digits_len] = '\0';
+            } else {
+                return -1;
+            }
         }
     }
+    printf("used digits: %s\n", used_digits);
+
+    // #pragma omp parallel for \
+    //     schedule(dynamic, 1) \
+    //     reduction(max:global_max_joltage) \
+    //     shared(bank, bank_len, joltage_len, lower_joltage, upper_joltage) \
+    //     private(true_joltage_len)
     
-    free(joltage);
-    return -1;
+    for (unsigned long long joltage_num = upper_joltage; joltage_num >= lower_joltage; joltage_num--) {
+        char joltage[MAX_DIGITS];
+        // convert joltage to string and check for used digits
+        if (split_to_digits(joltage_num, (char**)&joltage, joltage_len, &true_joltage_len, used_digits, true_used_digits_len) == FALSE) {
+            continue;
+        }
+        // printf("%llu ", joltage_num);
+
+        if (bank_contains_joltage(bank, (char**)&joltage, bank_len, true_joltage_len) == TRUE) {
+            // global_max_joltage = joltage_num;
+            // joltage_num = lower_joltage;        // effectivly a break
+            
+            global_max_joltage = max(joltage_num, global_max_joltage);
+            break;
+        }
+    }
+
+    *found_max_joltage = global_max_joltage;
+    return (global_max_joltage == 0ULL) ? -2 : SUCCESS;
 }
 
 
