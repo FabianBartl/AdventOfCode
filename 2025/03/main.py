@@ -1,6 +1,7 @@
 
 import sys
-
+import re
+from tqdm import tqdm
 
 def solve_part1(banks: list[list[int]]) -> None:
     all_found_max = []
@@ -30,29 +31,27 @@ def solve_part1(banks: list[list[int]]) -> None:
 
 
 def solve_part2(banks: list[list[int]]) -> None:
+    start_joltage = 100_000_000_000
+    end_joltage   = 999_999_999_999
+
     all_found_max = []
-    
     for ind, bank in enumerate(banks):
-        bank: list[int]
-        print(f"\n{ind}: {bank}")
+        print(f"\n{ind}: {bank=}")
         
         found_max = 0
-        for split_ind in range(1, len(bank)-12):
-            first_part = bank[:split_ind]
-            last_part = bank[split_ind:]
-            print(f"{first_part} | {last_part}")
+        for joltage in tqdm(range(end_joltage, start_joltage-1, -1), ):
             
-            first_max = max(first_part)
-            last_max = max(last_part)
+            joltagetext = str(joltage)
+            if 0 in set(joltagetext):
+                continue
+            pattern = "\d*".join(list(joltagetext))
             
-            current = first_max*10 + last_max
-            if current > found_max:
-                found_max = current
-                print(f"found new max: {current}")
+            if (matched := re.search(pattern, str(bank))) is not None:
+                found_max = joltage
+                print(f"found match for {joltage=}:", matched)
+                break
         
-        print(f"{found_max=}")
         all_found_max.append(found_max)
-    
     print(f"Solution:", sum(all_found_max))
 
 
