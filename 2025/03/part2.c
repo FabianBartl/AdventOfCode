@@ -202,11 +202,11 @@ int find_max_joltage(char* bank, size_t bank_len, size_t joltage_len, unsigned l
     //       1: 1.34 1.20 3.24
     //       0: 5.51 4.02 4.21
     int nthreads, tid;
-    #pragma omp parallel for \
-        schedule(dynamic, (unsigned long long)1e2) \
-        reduction(max:global_max_joltage) \
-        shared(bank, bank_len, joltage_len, lower_joltage, upper_joltage, found_flag) \
-        private(true_joltage_len, tid)
+    // #pragma omp parallel for \
+    //     schedule(dynamic, (unsigned long long)1e2) \
+    //     reduction(max:global_max_joltage) \
+    //     shared(bank, bank_len, joltage_len, lower_joltage, upper_joltage, found_flag) \
+    //     private(true_joltage_len, tid)
     
     for (unsigned long long joltage_num = upper_joltage; joltage_num >= lower_joltage; joltage_num--) {
         tid = omp_get_thread_num();
@@ -223,11 +223,11 @@ int find_max_joltage(char* bank, size_t bank_len, size_t joltage_len, unsigned l
 
         if (bank_contains_joltage(bank, joltage, bank_len, true_joltage_len) == TRUE) {
             found_flag = TRUE;
-            global_max_joltage = joltage_num;
+            // global_max_joltage = joltage_num;
             // printf("[%i] found local max: %llu\n", tid, joltage_num);
             
-            // global_max_joltage = max(joltage_num, global_max_joltage);
-            // break;
+            global_max_joltage = max(joltage_num, global_max_joltage);
+            break;
         }
     }
 
@@ -264,11 +264,11 @@ int main(int argc, char** argv) {
     unsigned long long found_max_joltage;
     
     int nthreads, tid;
-    // #pragma omp parallel for \
-    //     schedule(dynamic, 1) \
-    //     reduction(+:total_max_joltage) \
-    //     private(bank, found_max_joltage, tid) \
-    //     shared(line_count, lines_array, joltage_digits)
+    #pragma omp parallel for \
+        schedule(dynamic, 1) \
+        reduction(+:total_max_joltage) \
+        private(bank, found_max_joltage, tid) \
+        shared(line_count, lines_array, joltage_digits)
     
     for (size_t i=0; i<line_count; i++) {
         tid = omp_get_thread_num();
