@@ -87,15 +87,15 @@ int read_file(const char* filepath, char*** lines_array, size_t* line_count) {
 
 
 // in-place array reverse
-void reverse_string(char** string, size_t string_len) {
+void reverse_string(char* string, size_t string_len) {
     size_t left = 0;
     size_t right = string_len - 1;
     char tmp;
     while (left < right)
     {
-        tmp = (*string)[left];
-        (*string)[left] = (*string)[right];
-        (*string)[right] = tmp;
+        tmp = string[left];
+        string[left] = string[right];
+        string[right] = tmp;
         left++;
         right--;
     }
@@ -114,7 +114,7 @@ int str_contains_char(const char *string, char c, size_t str_len) {
 
 
 // split integer into an array of digits and returns FALSE if it contains an disallowed digit
-int split_to_digits(unsigned long long num, char** digits, size_t digits_len, size_t* digit_count, const char* allowed_digits, size_t allowed_digits_len) {
+int split_to_digits(unsigned long long num, char* digits, size_t digits_len, size_t* digit_count, const char* allowed_digits, size_t allowed_digits_len) {
     char contains_disallowed_chars = FALSE;
     char digit;
     size_t buff_ind = 0;
@@ -127,7 +127,7 @@ int split_to_digits(unsigned long long num, char** digits, size_t digits_len, si
         
         // get ascii value for current digit
         digit = (char)('0' + (num % 10ULL));
-        (*digits)[buff_ind++] = digit;
+        digits[buff_ind++] = digit;
         num /= 10ULL;
 
         if (str_contains_char(allowed_digits, digit, allowed_digits_len) == FALSE) {
@@ -142,14 +142,14 @@ int split_to_digits(unsigned long long num, char** digits, size_t digits_len, si
 
 
 // return TRUE if every joltage digit matches with any bank digit in order
-int bank_contains_joltage(char** bank, char** joltage, size_t bank_len, size_t joltage_len) {
+int bank_contains_joltage(char* bank, char* joltage, size_t bank_len, size_t joltage_len) {
     // iterate over bank digits and compare joltage digits to find a match
     char bank_digit;
     char joltage_digit;
     for (size_t bi=0, ji=0; bi<bank_len; bi++) {
 
-        bank_digit = (*bank)[bi];
-        joltage_digit = (*joltage)[ji];
+        bank_digit = bank[bi];
+        joltage_digit = joltage[ji];
         if (bank_digit == joltage_digit) {
             ji++;
 
@@ -166,7 +166,7 @@ int bank_contains_joltage(char** bank, char** joltage, size_t bank_len, size_t j
 
 
 // iterate over all possible joltages until first match with bank, returns SUCCESS if a max was found
-int find_max_joltage(char** bank, size_t bank_len, size_t joltage_len, unsigned long long* found_max_joltage) {
+int find_max_joltage(char* bank, size_t bank_len, size_t joltage_len, unsigned long long* found_max_joltage) {
     unsigned long long lower_joltage = (unsigned long long)powf(10.0f, (float)(joltage_len-1));      // 1e(12-1) = 1e11 = 100_000_000_000
     unsigned long long upper_joltage = (unsigned long long)powf(10.0f, (float)joltage_len) - 1;      // 1e12 - 1 =        999_999_999_999
 
@@ -176,10 +176,10 @@ int find_max_joltage(char** bank, size_t bank_len, size_t joltage_len, unsigned 
 
     // get all digits used by the bank
     size_t true_used_digits_len = 0;
-    char used_digits[11] = {(*bank)[0]};
+    char used_digits[11] = {bank[0]};
 
     for (size_t bi=1; bi<bank_len; bi++) {
-        char current_digit = (*bank)[bi];
+        char current_digit = bank[bi];
         if (str_contains_char(used_digits, current_digit, true_used_digits_len) == FALSE) {
             if (true_used_digits_len < 10) {
                 used_digits[true_used_digits_len] = current_digit;
@@ -200,12 +200,12 @@ int find_max_joltage(char** bank, size_t bank_len, size_t joltage_len, unsigned 
     for (unsigned long long joltage_num = upper_joltage; joltage_num >= lower_joltage; joltage_num--) {
         char joltage[MAX_DIGITS];
         // convert joltage to string and check for used digits
-        if (split_to_digits(joltage_num, (char**)&joltage, joltage_len, &true_joltage_len, used_digits, true_used_digits_len) == FALSE) {
+        if (split_to_digits(joltage_num, joltage, joltage_len, &true_joltage_len, used_digits, true_used_digits_len) == FALSE) {
             continue;
         }
         // printf("%llu ", joltage_num);
 
-        if (bank_contains_joltage(bank, (char**)&joltage, bank_len, true_joltage_len) == TRUE) {
+        if (bank_contains_joltage(bank, joltage, bank_len, true_joltage_len) == TRUE) {
             // global_max_joltage = joltage_num;
             // joltage_num = lower_joltage;        // effectivly a break
             
@@ -232,17 +232,17 @@ int main(int argc, char** argv) {
     int ret = read_file((const char*)filepath, &lines_array, &line_count);
 
     // get amount of digits to match
-    size_t digits = 12;
+    size_t joltage_digits = 12;
     if (argc > 2) {
-        digits = (size_t)strtoul(argv[2], NULL, 10);
-        if (digits > MAX_DIGITS) {
-            printf("limit digits from %lu to %lu\n", digits, MAX_DIGITS);
-            digits = MAX_DIGITS;
+        joltage_digits = (size_t)strtoul(argv[2], NULL, 10);
+        if (joltage_digits > MAX_DIGITS) {
+            printf("limit joltage digits from %lu to %lu\n", joltage_digits, MAX_DIGITS);
+            joltage_digits = MAX_DIGITS;
         }
     }
 
     // solve the file parallalized
-    char** bank;
+    char* bank;
     unsigned long long total_max_joltage = 0ULL;
     unsigned long long found_max_joltage;
     
@@ -251,14 +251,14 @@ int main(int argc, char** argv) {
         schedule(dynamic, 1) \
         reduction(+:total_max_joltage) \
         private(bank, found_max_joltage, tid) \
-        shared(line_count, lines_array, digits)
+        shared(line_count, lines_array, joltage_digits)
     
     for (size_t i=0; i<line_count; i++) {
         tid = omp_get_thread_num();
-        bank = &(lines_array[i]);
-        printf("[%i] %lu: %s\n", tid, i+1, *bank);
+        bank = lines_array[i];
+        printf("[%i] %lu: %s\n", tid, i+1, bank);
 
-        find_max_joltage(bank, strlen(*bank), digits, &found_max_joltage);
+        find_max_joltage(bank, strlen(bank), joltage_digits, &found_max_joltage);
         printf("[%i] %lu: found max joltage: %llu\n", tid, i+1, found_max_joltage);
 
         total_max_joltage += found_max_joltage;
