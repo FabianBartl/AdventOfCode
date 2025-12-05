@@ -173,6 +173,7 @@ int find_max_joltage(char* bank, size_t bank_len, size_t joltage_len, unsigned l
     unsigned long long global_max_joltage = 0ULL;
     *found_max_joltage = global_max_joltage;
     size_t true_joltage_len;
+    int found_flag = FALSE;
 
     // get all digits used by the bank
     size_t true_used_digits_len = 0;
@@ -189,15 +190,30 @@ int find_max_joltage(char* bank, size_t bank_len, size_t joltage_len, unsigned l
             }
         }
     }
-    printf("used digits: %s\n", used_digits);
+    // printf("used digits: %s\n", used_digits);
 
-    // #pragma omp parallel for \
-    //     schedule(dynamic, 1) \
-    //     reduction(max:global_max_joltage) \
-    //     shared(bank, bank_len, joltage_len, lower_joltage, upper_joltage) \
-    //     private(true_joltage_len)
+    // tested for dynamic scheduling
+    //  digits: realt time sec
+    //       6: 5.23 6.05 5.36
+    //       5: 2.79 2.55 1.73
+    //       4: 2.59 2.35 2.37
+    //       3: 1.41 1.44 1.83
+    //       2: 1.33 1.51 1.68
+    //       1: 1.34 1.20 3.24
+    //       0: 5.51 4.02 4.21
+    int nthreads, tid;
+    #pragma omp parallel for \
+        schedule(dynamic, (unsigned long long)1e2) \
+        reduction(max:global_max_joltage) \
+        shared(bank, bank_len, joltage_len, lower_joltage, upper_joltage, found_flag) \
+        private(true_joltage_len, tid)
     
     for (unsigned long long joltage_num = upper_joltage; joltage_num >= lower_joltage; joltage_num--) {
+        tid = omp_get_thread_num();
+        if (found_flag == TRUE) {
+            continue;
+        }
+
         char joltage[MAX_DIGITS];
         // convert joltage to string and check for used digits
         if (split_to_digits(joltage_num, joltage, joltage_len, &true_joltage_len, used_digits, true_used_digits_len) == FALSE) {
@@ -206,11 +222,12 @@ int find_max_joltage(char* bank, size_t bank_len, size_t joltage_len, unsigned l
         // printf("%llu ", joltage_num);
 
         if (bank_contains_joltage(bank, joltage, bank_len, true_joltage_len) == TRUE) {
-            // global_max_joltage = joltage_num;
-            // joltage_num = lower_joltage;        // effectivly a break
+            found_flag = TRUE;
+            global_max_joltage = joltage_num;
+            // printf("[%i] found local max: %llu\n", tid, joltage_num);
             
-            global_max_joltage = max(joltage_num, global_max_joltage);
-            break;
+            // global_max_joltage = max(joltage_num, global_max_joltage);
+            // break;
         }
     }
 
@@ -247,11 +264,11 @@ int main(int argc, char** argv) {
     unsigned long long found_max_joltage;
     
     int nthreads, tid;
-    #pragma omp parallel for \
-        schedule(dynamic, 1) \
-        reduction(+:total_max_joltage) \
-        private(bank, found_max_joltage, tid) \
-        shared(line_count, lines_array, joltage_digits)
+    // #pragma omp parallel for \
+    //     schedule(dynamic, 1) \
+    //     reduction(+:total_max_joltage) \
+    //     private(bank, found_max_joltage, tid) \
+    //     shared(line_count, lines_array, joltage_digits)
     
     for (size_t i=0; i<line_count; i++) {
         tid = omp_get_thread_num();
