@@ -1,9 +1,11 @@
 
 import sys
+import os
 import numpy as np
 
 
 def print_field(width: int, height: int, field: np.array) -> None:
+    os.system("cls")
     print(width, "x", height)
     for ir, row in enumerate(range(width)):
         print(f"{ir:>3}", end="  ")
