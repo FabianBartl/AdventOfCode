@@ -77,7 +77,7 @@ def solve_part2(width: int, height: int, field: np.array) -> None:
                 
                 # print("")
     
-        # print_field(width, height, field)
+        print_field(width, height, field)
         # print(f"{accesible_role_count=}")
         
         total_accesible_role_count += accesible_role_count
