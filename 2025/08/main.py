@@ -15,6 +15,14 @@ def euclidian_dist(v1: np.array, v2: np.array) -> float:
     return np.linalg.norm(v2 - v1)
 
 
+# returns the circuit index where the node is part of
+def get_circuit_ind(search_node_ind: np.array, circuits: list[ set[int] ]) -> int:
+    for circuit_ind, nodes_set in enumerate(circuits):
+        if search_node_ind in nodes_set:
+            return circuit_ind
+    return None
+
+
 # naive linear nearest neighbor search
 def nns(start_node_ind: np.array, nodes: list[np.array]) -> tuple[int, float]:
     min_dist = float("inf")
@@ -58,9 +66,10 @@ def draw(boxes: list[np.array], cables: set[ tuple[int,int] ]) -> None:
 
 
 def solve_part1(boxes: list[np.array]) -> None:
-    connected_boxes: set[int] = set()
     boxes_count = len(boxes)
+    connected_boxes: set[int] = set()
     cables: set[ tuple[int,int] ] = set()
+    circuits: list[ set[int] ] = []
     
     box_ind = -1
     while len(connected_boxes) < boxes_count:
@@ -68,17 +77,28 @@ def solve_part1(boxes: list[np.array]) -> None:
         if box_ind >= boxes_count:
             box_ind = 0
 
-        # if box_ind in connected_boxes:
-        #     continue
-
-        neighbor_ind, dist = nns(box_ind, boxes)
-
-        if (box_ind, neighbor_ind) not in cables and (neighbor_ind, box_ind) not in cables:
-            cables.add( (box_ind, neighbor_ind) )
-            connected_boxes.add(box_ind)
-            connected_boxes.add(neighbor_ind)
+        # skip, if box already part of a circuit
+        box_circuit_ind = get_circuit_ind(box_ind, circuits)
+        if box_circuit_ind is not None:
+            continue
         
-        # draw(boxes, cables)
+        # get nearest neighbor
+        neighbor_ind, dist = nns(box_ind, boxes)
+        
+        # add box to circuit of neighbor or create new circuit of neighbor and box
+        neighbor_circuit_ind = get_circuit_ind(neighbor_ind, circuits)
+        if neighbor_circuit_ind is not None:
+            circuits[neighbor_circuit_ind].add(box_ind)
+        else:
+            circuits.append({box_ind, neighbor_circuit_ind})
+
+        # connect box and neighbor by a cable
+        cables.add( (box_ind, neighbor_ind) )
+        connected_boxes.add(box_ind)
+        connected_boxes.add(neighbor_ind)
+
+        draw(boxes, cables)
+        plt.waitforbuttonpress()
         # plt.pause(1e-6)
 
     draw(boxes, cables)
@@ -95,14 +115,14 @@ def main() -> None:
             x, y, z = line.strip().split(",")
             coords.append(np.array( (float(x), float(y), float(z)) ))
     
-    example_connected = {
-        (0, 19), (0, 7),
-        (2, 13),
-    }
-    draw(coords, example_connected)
-    plt.show(block=True)
+    # example_connected = {
+    #     (0, 19), (0, 7),
+    #     (2, 13),
+    # }
+    # draw(coords, example_connected)
+    # plt.show(block=True)
 
-    # solve_part1(coords)
+    solve_part1(coords)
 
 
 if __name__ == "__main__":
